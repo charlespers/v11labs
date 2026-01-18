@@ -19,7 +19,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: config.name,
     description: config.description || "Technology articles and insights",
     icons: {
-      icon: '/configs/Images/logo.png',
+      icon: [
+        { url: '/configs/Images/logo.png', type: 'image/png' },
+      ],
       shortcut: '/configs/Images/logo.png',
       apple: '/configs/Images/logo.png',
     },

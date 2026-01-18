@@ -3,8 +3,13 @@ import { getSiteConfig, getSocialLinks } from '@/lib/config'
 import Logo from '@/components/Logo'
 
 export default async function Home() {
-  let config
-  let socialLinks
+  let config: { name: string; description: string }
+  let socialLinks: {
+    instagram?: string
+    twitter?: string
+    linkedin?: string
+    email?: string
+  }
   
   try {
     config = getSiteConfig()

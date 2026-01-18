@@ -27,10 +27,11 @@ export function getSiteConfig(): SiteConfig {
     email: process.env.EMAIL,
   }
   
-  // If env vars are set, use them (Vercel deployment)
-  if (envConfig.name) {
+  // If ANY env vars are set, use them (Vercel deployment)
+  // This ensures Vercel deployments work even if only some env vars are set
+  if (envConfig.name || envConfig.description || envConfig.instagram || envConfig.x || envConfig.linkedin || envConfig.email) {
     cachedConfig = {
-      name: envConfig.name,
+      name: envConfig.name || 'v11labs',
       description: envConfig.description || '',
       instagram: envConfig.instagram || '',
       x: envConfig.x || '',
