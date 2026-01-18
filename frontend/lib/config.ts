@@ -21,11 +21,16 @@ export function getSiteConfig(): SiteConfig {
   let configText: string | null = null
   
   try {
-    const configPath = path.join(process.cwd(), 'configs', 'text')
-    configText = fs.readFileSync(configPath, 'utf-8')
+    // Check if we're in a build environment or if file exists
+    if (typeof window === 'undefined') {
+      const configPath = path.join(process.cwd(), 'configs', 'text')
+      if (fs.existsSync(configPath)) {
+        configText = fs.readFileSync(configPath, 'utf-8')
+      }
+    }
   } catch (error) {
     // If file doesn't exist (e.g., in Vercel), try to read from env vars
-    console.log('Config file not found, using environment variables')
+    // Silently fail and use env vars
   }
   
   const config: Partial<SiteConfig> = {}

@@ -2,29 +2,17 @@ import { isAuthenticated } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import LogoutButton from '@/components/admin/LogoutButton'
-import { headers } from 'next/headers'
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') || ''
+  // Check authentication (login page will handle its own redirect)
+  const authenticated = await isAuthenticated()
 
-  // Skip auth check for login page
-  const isLoginPage = pathname === '/admin/login'
-
-  if (!isLoginPage) {
-    const authenticated = await isAuthenticated()
-    if (!authenticated) {
-      redirect('/admin/login')
-    }
-  }
-
-  // Don't show admin nav on login page
-  if (isLoginPage) {
-    return <>{children}</>
+  if (!authenticated) {
+    redirect('/admin/login')
   }
 
   return (

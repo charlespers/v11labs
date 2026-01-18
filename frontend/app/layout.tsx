@@ -3,11 +3,23 @@ import "./globals.css";
 import Link from "next/link";
 import { getSiteConfig } from "@/lib/config";
 
-const config = getSiteConfig();
+// Get config safely
+let config: { name: string; description: string };
+try {
+  config = getSiteConfig();
+} catch (error) {
+  console.error('Error loading config:', error);
+  config = { name: 'v11labs', description: '' };
+}
 
 export const metadata: Metadata = {
   title: config.name,
   description: config.description || "Technology articles and insights",
+  icons: {
+    icon: '/configs/Images/logo.png',
+    shortcut: '/configs/Images/logo.png',
+    apple: '/configs/Images/logo.png',
+  },
 };
 
 export default function RootLayout({
