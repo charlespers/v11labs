@@ -1,7 +1,16 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
+import { isAuthenticated } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import LogoutButton from '@/components/admin/LogoutButton'
 
 export default async function AdminDashboard() {
+  // Check authentication
+  const authenticated = await isAuthenticated()
+  
+  if (!authenticated) {
+    redirect('/admin/login')
+  }
   let articleCount = 0
   let publishedCount = 0
   
