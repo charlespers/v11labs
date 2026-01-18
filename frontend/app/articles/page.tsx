@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db'
 import ArticlesList from '@/components/ArticlesList'
+import { Article } from '@prisma/client'
 
 interface ArticlesPageProps {
   searchParams: Promise<{ tag?: string }>
@@ -8,7 +9,7 @@ interface ArticlesPageProps {
 export default async function ArticlesPage({ searchParams }: ArticlesPageProps) {
   const { tag } = await searchParams
   
-  let articles = []
+  let articles: Article[] = []
   let allTags: string[] = []
   
   try {

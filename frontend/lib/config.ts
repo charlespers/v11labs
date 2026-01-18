@@ -17,23 +17,44 @@ export function getSiteConfig(): SiteConfig {
     return cachedConfig
   }
 
-  // Try to read from config file, fallback to environment variables
+  // Always check environment variables first (for Vercel)
+  const envConfig: Partial<SiteConfig> = {
+    name: process.env.SITE_NAME,
+    description: process.env.SITE_DESCRIPTION,
+    instagram: process.env.INSTAGRAM,
+    x: process.env.X_HANDLE,
+    linkedin: process.env.LINKEDIN,
+    email: process.env.EMAIL,
+  }
+  
+  // If env vars are set, use them (Vercel deployment)
+  if (envConfig.name) {
+    cachedConfig = {
+      name: envConfig.name,
+      description: envConfig.description || '',
+      instagram: envConfig.instagram || '',
+      x: envConfig.x || '',
+      linkedin: envConfig.linkedin || '',
+      email: envConfig.email || '',
+    }
+    return cachedConfig
+  }
+  
+  // Otherwise, try to read from config file (local development)
   let configText: string | null = null
+  const config: Partial<SiteConfig> = {}
   
   try {
-    // Check if we're in a build environment or if file exists
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' && typeof process !== 'undefined') {
       const configPath = path.join(process.cwd(), 'configs', 'text')
       if (fs.existsSync(configPath)) {
         configText = fs.readFileSync(configPath, 'utf-8')
       }
     }
   } catch (error) {
-    // If file doesn't exist (e.g., in Vercel), try to read from env vars
-    // Silently fail and use env vars
+    // File read failed, will use defaults
+    console.log('Config file not available, using defaults')
   }
-  
-  const config: Partial<SiteConfig> = {}
   
   if (configText) {
     const lines = configText.split('\n').filter(line => line.trim())
@@ -65,9 +86,9 @@ export function getSiteConfig(): SiteConfig {
     }
   }
   
-  // Fallback to environment variables if config file not available
+  // Final fallback with defaults
   cachedConfig = {
-    name: config.name || process.env.SITE_NAME || 'Tech Blog',
+    name: config.name || process.env.SITE_NAME || 'v11labs',
     description: config.description || process.env.SITE_DESCRIPTION || '',
     instagram: config.instagram || process.env.INSTAGRAM || '',
     x: config.x || process.env.X_HANDLE || '',
