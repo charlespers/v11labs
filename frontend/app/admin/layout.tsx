@@ -11,10 +11,10 @@ export default async function AdminLayout({
 }) {
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') || ''
-  
+
   // Skip auth check for login page
   const isLoginPage = pathname === '/admin/login'
-  
+
   if (!isLoginPage) {
     const authenticated = await isAuthenticated()
     if (!authenticated) {

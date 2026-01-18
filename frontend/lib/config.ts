@@ -17,12 +17,20 @@ export function getSiteConfig(): SiteConfig {
     return cachedConfig
   }
 
-  const configPath = path.join(process.cwd(), 'configs', 'text')
+  // Try to read from config file, fallback to environment variables
+  let configText: string | null = null
   
   try {
-    const configText = fs.readFileSync(configPath, 'utf-8')
-    const config: Partial<SiteConfig> = {}
-    
+    const configPath = path.join(process.cwd(), 'configs', 'text')
+    configText = fs.readFileSync(configPath, 'utf-8')
+  } catch (error) {
+    // If file doesn't exist (e.g., in Vercel), try to read from env vars
+    console.log('Config file not found, using environment variables')
+  }
+  
+  const config: Partial<SiteConfig> = {}
+  
+  if (configText) {
     const lines = configText.split('\n').filter(line => line.trim())
     
     for (const line of lines) {
@@ -50,27 +58,19 @@ export function getSiteConfig(): SiteConfig {
           break
       }
     }
-    
-    cachedConfig = {
-      name: config.name || 'Tech Blog',
-      description: config.description || '',
-      instagram: config.instagram || '',
-      x: config.x || '',
-      linkedin: config.linkedin || '',
-      email: config.email || '',
-    }
-    
-    return cachedConfig
-  } catch (error) {
-    console.error('Error reading config:', error)
-    return {
-      name: 'Tech Blog',
-      description: '',
-      instagram: '',
-      x: '',
-      linkedin: '',
-    }
   }
+  
+  // Fallback to environment variables if config file not available
+  cachedConfig = {
+    name: config.name || process.env.SITE_NAME || 'Tech Blog',
+    description: config.description || process.env.SITE_DESCRIPTION || '',
+    instagram: config.instagram || process.env.INSTAGRAM || '',
+    x: config.x || process.env.X_HANDLE || '',
+    linkedin: config.linkedin || process.env.LINKEDIN || '',
+    email: config.email || process.env.EMAIL || '',
+  }
+  
+  return cachedConfig
 }
 
 export function getSocialLinks() {
