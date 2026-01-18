@@ -8,31 +8,39 @@ interface ArticlesPageProps {
 export default async function ArticlesPage({ searchParams }: ArticlesPageProps) {
   const { tag } = await searchParams
   
-  const articles = await prisma.article.findMany({
-    where: {
-      publishedAt: {
-        not: null,
-        lte: new Date()
+  let articles = []
+  let allTags: string[] = []
+  
+  try {
+    articles = await prisma.article.findMany({
+      where: {
+        publishedAt: {
+          not: null,
+          lte: new Date()
+        },
+        ...(tag && {
+          tags: {
+            contains: tag
+          }
+        })
       },
-      ...(tag && {
-        tags: {
-          contains: tag
-        }
-      })
-    },
-    orderBy: {
-      publishedAt: 'desc'
-    }
-  })
+      orderBy: {
+        publishedAt: 'desc'
+      }
+    })
 
-  // Extract all unique tags
-  const allTags = Array.from(
-    new Set(
-      articles
-        .flatMap(article => article.tags?.split(',').map(t => t.trim()) || [])
-        .filter(Boolean)
-    )
-  ).sort()
+    // Extract all unique tags
+    allTags = Array.from(
+      new Set(
+        articles
+          .flatMap(article => article.tags?.split(',').map(t => t.trim()) || [])
+          .filter(Boolean)
+      )
+    ).sort()
+  } catch (error) {
+    console.error('Database error:', error)
+    // Return empty arrays if database is not available
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

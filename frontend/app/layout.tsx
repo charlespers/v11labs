@@ -3,30 +3,36 @@ import "./globals.css";
 import Link from "next/link";
 import { getSiteConfig } from "@/lib/config";
 
-// Get config safely
-let config: { name: string; description: string };
-try {
-  config = getSiteConfig();
-} catch (error) {
-  console.error('Error loading config:', error);
-  config = { name: 'v11labs', description: '' };
+// Get config safely - use function call in component to avoid build-time issues
+function getConfig() {
+  try {
+    return getSiteConfig();
+  } catch (error) {
+    console.error('Error loading config:', error);
+    return { name: 'v11labs', description: '' };
+  }
 }
 
-export const metadata: Metadata = {
-  title: config.name,
-  description: config.description || "Technology articles and insights",
-  icons: {
-    icon: '/configs/Images/logo.png',
-    shortcut: '/configs/Images/logo.png',
-    apple: '/configs/Images/logo.png',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const config = getConfig();
+  return {
+    title: config.name,
+    description: config.description || "Technology articles and insights",
+    icons: {
+      icon: '/configs/Images/logo.png',
+      shortcut: '/configs/Images/logo.png',
+      apple: '/configs/Images/logo.png',
+    },
+  };
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const config = getConfig();
+  
   return (
     <html lang="en">
       <body className="antialiased">

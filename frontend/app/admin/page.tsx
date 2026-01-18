@@ -2,15 +2,23 @@ import { prisma } from '@/lib/db'
 import Link from 'next/link'
 
 export default async function AdminDashboard() {
-  const articleCount = await prisma.article.count()
-  const publishedCount = await prisma.article.count({
-    where: {
-      publishedAt: {
-        not: null,
-        lte: new Date()
+  let articleCount = 0
+  let publishedCount = 0
+  
+  try {
+    articleCount = await prisma.article.count()
+    publishedCount = await prisma.article.count({
+      where: {
+        publishedAt: {
+          not: null,
+          lte: new Date()
+        }
       }
-    }
-  })
+    })
+  } catch (error) {
+    console.error('Database error:', error)
+    // Return zeros if database is not available
+  }
 
   return (
     <div>

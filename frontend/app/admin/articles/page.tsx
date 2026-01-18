@@ -2,11 +2,18 @@ import { prisma } from '@/lib/db'
 import Link from 'next/link'
 
 export default async function ArticlesPage() {
-  const articles = await prisma.article.findMany({
-    orderBy: {
-      createdAt: 'desc'
-    }
-  })
+  let articles = []
+  
+  try {
+    articles = await prisma.article.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+  } catch (error) {
+    console.error('Database error:', error)
+    // Return empty array if database is not available
+  }
 
   return (
     <div>
