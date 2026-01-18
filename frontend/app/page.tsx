@@ -2,23 +2,20 @@ import SocialLinks from '@/components/SocialLinks'
 import { getSiteConfig, getSocialLinks } from '@/lib/config'
 import Logo from '@/components/Logo'
 
-// Force dynamic rendering to avoid static generation issues
-export const dynamic = 'force-dynamic'
-
 export default async function Home() {
   // Always provide defaults to prevent any undefined errors
   let config: { name: string; description: string } = {
     name: 'v11labs',
     description: 'Tech breakdowns related to robotics and hardware software codesign'
   }
-  
+
   let socialLinks: {
     instagram?: string
     twitter?: string
     linkedin?: string
     email?: string
   } = {}
-  
+
   try {
     const siteConfig = getSiteConfig()
     config = {
@@ -27,17 +24,21 @@ export default async function Home() {
     }
     socialLinks = getSocialLinks()
   } catch (error) {
-    console.error('Error loading config:', error)
-    // Use environment variables as fallback
-    config = { 
-      name: process.env.SITE_NAME || 'v11labs', 
-      description: process.env.SITE_DESCRIPTION || 'Tech breakdowns related to robotics and hardware software codesign' 
+    // Silent fallback - use environment variables or defaults
+    config = {
+      name: process.env.SITE_NAME || 'v11labs',
+      description: process.env.SITE_DESCRIPTION || 'Tech breakdowns related to robotics and hardware software codesign'
     }
+    const instagram = process.env.INSTAGRAM
+    const xHandle = process.env.X_HANDLE
+    const linkedin = process.env.LINKEDIN
+    const email = process.env.EMAIL
+
     socialLinks = {
-      instagram: process.env.INSTAGRAM ? `https://instagram.com/${process.env.INSTAGRAM.replace('@', '')}` : undefined,
-      twitter: process.env.X_HANDLE ? `https://twitter.com/${process.env.X_HANDLE.replace('@', '')}` : undefined,
-      linkedin: process.env.LINKEDIN ? `https://linkedin.com/in/${process.env.LINKEDIN.replace('@', '')}` : undefined,
-      email: process.env.EMAIL ? `mailto:${process.env.EMAIL}` : undefined,
+      instagram: instagram ? `https://instagram.com/${instagram.replace('@', '')}` : undefined,
+      twitter: xHandle ? `https://twitter.com/${xHandle.replace('@', '')}` : undefined,
+      linkedin: linkedin ? `https://linkedin.com/in/${linkedin.replace('@', '')}` : undefined,
+      email: email ? `mailto:${email}` : undefined,
     }
   }
 

@@ -8,24 +8,35 @@ function getConfig() {
   try {
     return getSiteConfig();
   } catch (error) {
-    console.error('Error loading config:', error);
-    return { name: 'v11labs', description: '' };
+    // Silently fail and return defaults
+    return {
+      name: process.env.SITE_NAME || 'v11labs',
+      description: process.env.SITE_DESCRIPTION || ''
+    };
   }
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const config = getConfig();
-  return {
-    title: config.name,
-    description: config.description || "Technology articles and insights",
-    icons: {
-      icon: [
-        { url: '/configs/Images/logo.png', type: 'image/png' },
-      ],
-      shortcut: '/configs/Images/logo.png',
-      apple: '/configs/Images/logo.png',
-    },
-  };
+  try {
+    const config = getConfig();
+    return {
+      title: config.name || 'v11labs',
+      description: config.description || "Technology articles and insights",
+      icons: {
+        icon: [
+          { url: '/configs/Images/logo.png', type: 'image/png' },
+        ],
+        shortcut: '/configs/Images/logo.png',
+        apple: '/configs/Images/logo.png',
+      },
+    };
+  } catch (error) {
+    // Fallback metadata if config fails
+    return {
+      title: 'v11labs',
+      description: "Technology articles and insights",
+    };
+  }
 }
 
 export default function RootLayout({
@@ -34,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const config = getConfig();
-  
+
   return (
     <html lang="en">
       <body className="antialiased">
