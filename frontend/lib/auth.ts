@@ -11,13 +11,19 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 export async function setAuthCookie() {
-  const cookieStore = await cookies()
-  cookieStore.set(COOKIE_NAME, ADMIN_PASSWORD, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-  })
+  try {
+    const cookieStore = await cookies()
+    cookieStore.set(COOKIE_NAME, ADMIN_PASSWORD, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    })
+  } catch (error) {
+    console.error('Error setting auth cookie:', error)
+    throw error
+  }
 }
 
 export async function clearAuthCookie() {
