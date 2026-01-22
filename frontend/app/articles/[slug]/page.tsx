@@ -10,7 +10,7 @@ interface ArticlePageProps {
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params
-  
+
   const article = await prisma.article.findUnique({
     where: { slug }
   })
@@ -24,18 +24,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   // Get related articles (same tags)
   const relatedArticles = tagList.length > 0
     ? await prisma.article.findMany({
-        where: {
-          id: { not: article.id },
-          publishedAt: { not: null, lte: new Date() },
-          tags: {
-            contains: tagList[0]
-          }
-        },
-        take: 3,
-        orderBy: {
-          publishedAt: 'desc'
+      where: {
+        id: { not: article.id },
+        publishedAt: { not: null, lte: new Date() },
+        tags: {
+          contains: tagList[0]
         }
-      })
+      },
+      take: 3,
+      orderBy: {
+        publishedAt: 'desc'
+      }
+    })
     : []
 
   return (
@@ -49,10 +49,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <div className="flex items-center gap-6 text-xs text-gray-500 uppercase tracking-wide">
             {article.publishedAt && (
               <time dateTime={article.publishedAt.toISOString()} className="font-light">
-                {article.publishedAt.toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
+                {article.publishedAt.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
                 })}
               </time>
             )}
@@ -73,7 +73,31 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </header>
 
         <div className="prose prose-lg max-w-none mb-12">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              img: ({ node, ...props }) => {
+                // Convert Imgur page URLs to direct image URLs
+                let src = props.src || ''
+                if (src.includes('imgur.com/') && !src.includes('i.imgur.com')) {
+                  // Extract the image ID from imgur.com/ID or imgur.com/a/ID
+                  const match = src.match(/imgur\.com\/(?:a\/)?([a-zA-Z0-9]+)/)
+                  if (match && match[1]) {
+                    src = `https://i.imgur.com/${match[1]}.jpg`
+                  }
+                }
+                return (
+                  <img
+                    {...props}
+                    src={src}
+                    alt={props.alt || ''}
+                    className="rounded-lg my-8 max-w-full h-auto"
+                    loading="lazy"
+                  />
+                )
+              }
+            }}
+          >
             {article.content}
           </ReactMarkdown>
         </div>
@@ -84,7 +108,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <ul className="space-y-4">
               {relatedArticles.map((related) => (
                 <li key={related.id}>
-                  <Link 
+                  <Link
                     href={`/articles/${related.slug}`}
                     className="text-gray-900 hover:text-gray-600 transition-colors font-light"
                   >

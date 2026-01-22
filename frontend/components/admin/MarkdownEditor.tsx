@@ -331,33 +331,30 @@ export default function MarkdownEditor({ content, onChange }: MarkdownEditorProp
             <button
               type="button"
               onClick={() => setViewMode('edit')}
-              className={`px-3 py-1 text-xs font-medium transition-colors ${
-                viewMode === 'edit'
+              className={`px-3 py-1 text-xs font-medium transition-colors ${viewMode === 'edit'
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               Edit
             </button>
             <button
               type="button"
               onClick={() => setViewMode('split')}
-              className={`px-3 py-1 text-xs font-medium transition-colors border-x border-gray-300 ${
-                viewMode === 'split'
+              className={`px-3 py-1 text-xs font-medium transition-colors border-x border-gray-300 ${viewMode === 'split'
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               Split
             </button>
             <button
               type="button"
               onClick={() => setViewMode('preview')}
-              className={`px-3 py-1 text-xs font-medium transition-colors ${
-                viewMode === 'preview'
+              className={`px-3 py-1 text-xs font-medium transition-colors ${viewMode === 'preview'
                   ? 'bg-blue-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               Preview
             </button>
@@ -421,7 +418,31 @@ export default function MarkdownEditor({ content, onChange }: MarkdownEditorProp
             )}
             <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:font-bold prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100">
               {content ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    img: ({ node, ...props }) => {
+                      // Convert Imgur page URLs to direct image URLs
+                      let src = props.src || ''
+                      if (src.includes('imgur.com/') && !src.includes('i.imgur.com')) {
+                        // Extract the image ID from imgur.com/ID or imgur.com/a/ID
+                        const match = src.match(/imgur\.com\/(?:a\/)?([a-zA-Z0-9]+)/)
+                        if (match && match[1]) {
+                          src = `https://i.imgur.com/${match[1]}.jpg`
+                        }
+                      }
+                      return (
+                        <img
+                          {...props}
+                          src={src}
+                          alt={props.alt || ''}
+                          className="rounded-lg my-4 max-w-full h-auto"
+                          loading="lazy"
+                        />
+                      )
+                    }
+                  }}
+                >
                   {content}
                 </ReactMarkdown>
               ) : (
@@ -432,17 +453,23 @@ export default function MarkdownEditor({ content, onChange }: MarkdownEditorProp
         )}
       </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-500">
-        <div className="flex gap-4">
-          <span>💡 <strong>Tip:</strong> Select text and click a button to format, or use keyboard shortcuts</span>
+      <div className="flex flex-col gap-2 text-xs text-gray-500">
+        <div className="flex items-center justify-between">
+          <div className="flex gap-4">
+            <span>💡 <strong>Tip:</strong> Select text and click a button to format, or use keyboard shortcuts</span>
+          </div>
+          <div className="flex gap-2">
+            <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Ctrl+B</kbd>
+            <span>Bold</span>
+            <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Ctrl+I</kbd>
+            <span>Italic</span>
+            <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Ctrl+K</kbd>
+            <span>Link</span>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Ctrl+B</kbd>
-          <span>Bold</span>
-          <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Ctrl+I</kbd>
-          <span>Italic</span>
-          <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Ctrl+K</kbd>
-          <span>Link</span>
+        <div className="bg-blue-50 border border-blue-200 rounded-md px-3 py-2 text-blue-800">
+          <strong>📸 Image Tip:</strong> For Imgur images, use the direct URL format: <code className="bg-blue-100 px-1 rounded">https://i.imgur.com/IMAGE_ID.jpg</code>.
+          If you paste an Imgur page URL (like <code className="bg-blue-100 px-1 rounded">imgur.com/KaXwgz8</code>), it will be automatically converted!
         </div>
       </div>
     </div>
