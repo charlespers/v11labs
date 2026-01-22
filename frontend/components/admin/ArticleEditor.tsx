@@ -58,6 +58,22 @@ export default function ArticleEditor({ article }: ArticleEditorProps) {
       const url = article ? `/api/admin/articles/${article.id}` : '/api/admin/articles'
       const method = article ? 'PUT' : 'POST'
 
+      // Handle publishedAt date conversion properly
+      let publishedAtValue: string | null = null
+      if (publishedAt) {
+        // Convert datetime-local to ISO string, ensuring it's treated as local time
+        const localDate = new Date(publishedAt)
+        // If the date is in the past or very close to now, set it to now to ensure it shows immediately
+        const now = new Date()
+        if (localDate <= now || Math.abs(localDate.getTime() - now.getTime()) < 60000) {
+          // Set to current time if it's in the past or within 1 minute
+          publishedAtValue = now.toISOString()
+        } else {
+          // Use the selected future date
+          publishedAtValue = localDate.toISOString()
+        }
+      }
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -67,7 +83,7 @@ export default function ArticleEditor({ article }: ArticleEditorProps) {
           description: description || null,
           content,
           tags: tags || null,
-          publishedAt: publishedAt ? new Date(publishedAt).toISOString() : null,
+          publishedAt: publishedAtValue,
         }),
       })
 
@@ -88,6 +104,17 @@ export default function ArticleEditor({ article }: ArticleEditorProps) {
     if (confirm('Are you sure you want to unpublish this article? It will become a draft.')) {
       setPublishedAt('')
     }
+  }
+
+  const handlePublishNow = () => {
+    const now = new Date()
+    // Set to current date/time in local timezone format for datetime-local input
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(now.getMinutes()).padStart(2, '0')
+    setPublishedAt(`${year}-${month}-${day}T${hours}:${minutes}`)
   }
 
   return (
@@ -201,7 +228,16 @@ export default function ArticleEditor({ article }: ArticleEditorProps) {
             onChange={(e) => setPublishedAt(e.target.value)}
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
-          {publishedAt && (
+          {!publishedAt ? (
+            <button
+              type="button"
+              onClick={handlePublishNow}
+              className="px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              title="Publish immediately"
+            >
+              Publish Now
+            </button>
+          ) : (
             <button
               type="button"
               onClick={() => setPublishedAt('')}
@@ -213,9 +249,9 @@ export default function ArticleEditor({ article }: ArticleEditorProps) {
           )}
         </div>
         <p className="mt-1 text-sm text-gray-500">
-          {publishedAt 
-            ? 'Article will be published at the selected date/time' 
-            : 'Leave empty to save as draft. You can publish later.'}
+          {publishedAt
+            ? 'Article will be published at the selected date/time. Use "Publish Now" to publish immediately.'
+            : 'Leave empty to save as draft. Click "Publish Now" to publish immediately.'}
         </p>
       </div>
 

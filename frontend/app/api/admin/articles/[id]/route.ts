@@ -27,6 +27,19 @@ export async function PUT(
       return NextResponse.json({ error: 'Slug already exists' }, { status: 400 })
     }
 
+    // Ensure publishedAt is set correctly - if it's in the past or very close to now, set to now
+    let publishedAtValue: Date | null = null
+    if (publishedAt) {
+      const publishDate = new Date(publishedAt)
+      const now = new Date()
+      // If the date is in the past or within 1 minute of now, set to current time
+      if (publishDate <= now || Math.abs(publishDate.getTime() - now.getTime()) < 60000) {
+        publishedAtValue = now
+      } else {
+        publishedAtValue = publishDate
+      }
+    }
+
     const article = await prisma.article.update({
       where: { id },
       data: {
@@ -35,7 +48,7 @@ export async function PUT(
         description,
         content,
         tags,
-        publishedAt: publishedAt ? new Date(publishedAt) : null,
+        publishedAt: publishedAtValue,
       }
     })
 
