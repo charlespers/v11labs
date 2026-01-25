@@ -4,7 +4,7 @@ import type { Article } from '@prisma/client'
 
 export default async function ArticlesPage() {
   let articles: Article[] = []
-  
+
   try {
     const result = await prisma.article.findMany({
       orderBy: {
@@ -62,9 +62,21 @@ export default async function ArticlesPage() {
                   {article.tags || '—'}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
-                  {article.publishedAt
-                    ? article.publishedAt.toLocaleDateString()
-                    : '—'}
+                  {article.publishedAt ? (
+                    <div>
+                      <div>{article.publishedAt.toLocaleDateString()}</div>
+                      <div className="text-xs text-gray-400">
+                        {article.publishedAt.toLocaleTimeString()}
+                      </div>
+                      {article.publishedAt > new Date() && (
+                        <div className="text-xs text-orange-600 mt-1">
+                          (Future date)
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    '—'
+                  )}
                 </td>
                 <td className="px-6 py-4 text-sm font-medium">
                   <Link
