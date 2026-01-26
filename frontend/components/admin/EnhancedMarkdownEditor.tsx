@@ -326,31 +326,114 @@ export default function EnhancedMarkdownEditor({ content, onChange }: EnhancedMa
         switch (e.key) {
           case 'b':
             e.preventDefault()
-            insertText('**', '**', 'bold text')
+            {
+              const textarea = textareaRef.current
+              if (!textarea) return
+              const start = textarea.selectionStart
+              const end = textarea.selectionEnd
+              const selectedText = content.substring(start, end)
+              const textToInsert = selectedText || 'bold text'
+              const newContent =
+                content.substring(0, start) +
+                '**' +
+                textToInsert +
+                '**' +
+                content.substring(end)
+              onChange(newContent)
+            }
             break
           case 'i':
             e.preventDefault()
-            insertText('*', '*', 'italic text')
+            {
+              const textarea = textareaRef.current
+              if (!textarea) return
+              const start = textarea.selectionStart
+              const end = textarea.selectionEnd
+              const selectedText = content.substring(start, end)
+              const textToInsert = selectedText || 'italic text'
+              const newContent =
+                content.substring(0, start) +
+                '*' +
+                textToInsert +
+                '*' +
+                content.substring(end)
+              onChange(newContent)
+            }
             break
           case 'k':
             e.preventDefault()
-            insertText('[', '](url)', 'link text')
+            {
+              const textarea = textareaRef.current
+              if (!textarea) return
+              const start = textarea.selectionStart
+              const end = textarea.selectionEnd
+              const selectedText = content.substring(start, end)
+              const textToInsert = selectedText || 'link text'
+              const newContent =
+                content.substring(0, start) +
+                '[' +
+                textToInsert +
+                '](url)' +
+                content.substring(end)
+              onChange(newContent)
+            }
             break
           case '1':
             e.preventDefault()
-            insertText('# ', '', 'Heading 1')
+            {
+              const textarea = textareaRef.current
+              if (!textarea) return
+              const start = textarea.selectionStart
+              const newContent =
+                content.substring(0, start) +
+                '# Heading 1' +
+                content.substring(start)
+              onChange(newContent)
+            }
             break
           case '2':
             e.preventDefault()
-            insertText('## ', '', 'Heading 2')
+            {
+              const textarea = textareaRef.current
+              if (!textarea) return
+              const start = textarea.selectionStart
+              const newContent =
+                content.substring(0, start) +
+                '## Heading 2' +
+                content.substring(start)
+              onChange(newContent)
+            }
             break
           case '3':
             e.preventDefault()
-            insertText('### ', '', 'Heading 3')
+            {
+              const textarea = textareaRef.current
+              if (!textarea) return
+              const start = textarea.selectionStart
+              const newContent =
+                content.substring(0, start) +
+                '### Heading 3' +
+                content.substring(start)
+              onChange(newContent)
+            }
             break
           case 'm':
             e.preventDefault()
-            insertInlineMath()
+            {
+              const textarea = textareaRef.current
+              if (!textarea) return
+              const start = textarea.selectionStart
+              const end = textarea.selectionEnd
+              const selectedText = content.substring(start, end)
+              const textToInsert = selectedText || 'E = mc^2'
+              const newContent =
+                content.substring(0, start) +
+                '$' +
+                textToInsert +
+                '$' +
+                content.substring(end)
+              onChange(newContent)
+            }
             break
         }
       }
@@ -358,7 +441,7 @@ export default function EnhancedMarkdownEditor({ content, onChange }: EnhancedMa
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [content])
+  }, [content, onChange])
 
   return (
     <div className="space-y-2">

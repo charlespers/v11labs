@@ -62,31 +62,32 @@ export default async function NotesPage({ searchParams }: NotesPageProps) {
       </div>
 
       {/* Search and Filter */}
-      <form method="get" className="mb-6 flex gap-4">
-        <div className="flex-1">
-          <input
-            type="text"
-            name="search"
-            placeholder="Search notes..."
-            defaultValue={search || ''}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
-        >
-          Search
-        </button>
-        {search && (
-          <Link
-            href="/admin/notes"
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+      <div className="mb-6">
+        <form method="get" className="flex gap-4 mb-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              name="search"
+              placeholder="Search notes..."
+              defaultValue={search || ''}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
           >
-            Clear
-          </Link>
-        )}
-      </form>
+            Search
+          </button>
+          {search && (
+            <Link
+              href="/admin/notes"
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+            >
+              Clear
+            </Link>
+          )}
+        </form>
         {allTags.length > 0 && (
           <div className="flex gap-2 flex-wrap">
             <Link
