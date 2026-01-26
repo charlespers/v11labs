@@ -24,3 +24,15 @@ model Article {
 
   @@map("articles")
 }
+
+model Note {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   // Enhanced markdown with LaTeX
+  tags        String?  // Comma-separated tags
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("notes")
+}
