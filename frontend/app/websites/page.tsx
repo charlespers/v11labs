@@ -66,6 +66,10 @@ export default async function WebsitesPage({ searchParams }: WebsitesPageProps) 
   } catch (error) {
     console.error('Database error:', error)
     // Return empty arrays if database is not available
+    // Check if it's a table doesn't exist error
+    if (error instanceof Error && error.message.includes('does not exist')) {
+      console.error('⚠️  Database tables may not exist. Run: npx prisma migrate deploy')
+    }
   }
 
   return (
@@ -102,7 +106,10 @@ export default async function WebsitesPage({ searchParams }: WebsitesPageProps) 
       )}
 
       {websites.length === 0 ? (
-        <p className="text-gray-600 text-center py-12">No websites found.</p>
+        <div className="text-center py-12">
+          <p className="text-gray-600 mb-4">No published websites found.</p>
+          <p className="text-sm text-gray-500">Make sure websites are published in the admin panel.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {websites.map((website) => (
