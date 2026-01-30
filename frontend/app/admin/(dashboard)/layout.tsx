@@ -32,10 +32,22 @@ export default async function AdminDashboardLayout({
                                     Articles
                                 </Link>
                                 <Link
-                                    href="/admin/notes"
+                                    href="/admin/research"
                                     className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
                                 >
-                                    Notes
+                                    Research
+                                </Link>
+                                <Link
+                                    href="/admin/projects"
+                                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                                >
+                                    Projects
+                                </Link>
+                                <Link
+                                    href="/admin/websites"
+                                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                                >
+                                    Websites
                                 </Link>
                             </div>
                         </div>

@@ -3,6 +3,11 @@
 import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import 'katex/dist/katex.min.css'
 
 interface MarkdownEditorProps {
   content: string
@@ -416,16 +421,42 @@ export default function MarkdownEditor({ content, onChange }: MarkdownEditorProp
                 Preview
               </div>
             )}
-            <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:font-bold prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100">
+            <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:font-bold">
               {content ? (
                 <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
                   components={{
-                    img: ({ node, ...props }) => {
-                      // Convert Imgur page URLs to direct image URLs
+                    // Code blocks with syntax highlighting
+                    code({ node, inline, className, children, ...props }: any) {
+                      const match = /language-(\w+)/.exec(className || '')
+                      const language = match ? match[1] : ''
+                      
+                      if (!inline && language) {
+                        return (
+                          <SyntaxHighlighter
+                            style={vscDarkPlus}
+                            language={language}
+                            PreTag="div"
+                            className="rounded-lg my-4"
+                            {...props}
+                          >
+                            {String(children).replace(/\n$/, '')}
+                          </SyntaxHighlighter>
+                        )
+                      }
+                      
+                      // Inline code
+                      return (
+                        <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono text-gray-800" {...props}>
+                          {children}
+                        </code>
+                      )
+                    },
+                    // Images with Imgur URL conversion
+                    img: ({ node, ...props }: any) => {
                       let src = props.src || ''
                       if (src.includes('imgur.com/') && !src.includes('i.imgur.com')) {
-                        // Extract the image ID from imgur.com/ID or imgur.com/a/ID
                         const match = src.match(/imgur\.com\/(?:a\/)?([a-zA-Z0-9]+)/)
                         if (match && match[1]) {
                           src = `https://i.imgur.com/${match[1]}.jpg`
@@ -440,7 +471,19 @@ export default function MarkdownEditor({ content, onChange }: MarkdownEditorProp
                           loading="lazy"
                         />
                       )
-                    }
+                    },
+                    // Enhanced table styling
+                    table: ({ node, ...props }: any) => (
+                      <div className="overflow-x-auto my-4">
+                        <table className="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg" {...props} />
+                      </div>
+                    ),
+                    th: ({ node, ...props }: any) => (
+                      <th className="px-4 py-2 bg-gray-50 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-300" {...props} />
+                    ),
+                    td: ({ node, ...props }: any) => (
+                      <td className="px-4 py-2 text-sm text-gray-900 border-b border-gray-200" {...props} />
+                    ),
                   }}
                 >
                   {content}
@@ -467,9 +510,17 @@ export default function MarkdownEditor({ content, onChange }: MarkdownEditorProp
             <span>Link</span>
           </div>
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded-md px-3 py-2 text-blue-800">
-          <strong>📸 Image Tip:</strong> For Imgur images, use the direct URL format: <code className="bg-blue-100 px-1 rounded">https://i.imgur.com/IMAGE_ID.jpg</code>.
-          If you paste an Imgur page URL (like <code className="bg-blue-100 px-1 rounded">imgur.com/KaXwgz8</code>), it will be automatically converted!
+        <div className="space-y-2">
+          <div className="bg-blue-50 border border-blue-200 rounded-md px-3 py-2 text-blue-800">
+            <strong>📸 Image Tip:</strong> For Imgur images, use the direct URL format: <code className="bg-blue-100 px-1 rounded">https://i.imgur.com/IMAGE_ID.jpg</code>.
+            If you paste an Imgur page URL (like <code className="bg-blue-100 px-1 rounded">imgur.com/KaXwgz8</code>), it will be automatically converted!
+          </div>
+          <div className="bg-purple-50 border border-purple-200 rounded-md px-3 py-2 text-purple-800">
+            <strong>💻 Code Blocks:</strong> Use triple backticks with language name for syntax highlighting: <code className="bg-purple-100 px-1 rounded">```javascript</code> or <code className="bg-purple-100 px-1 rounded">```python</code>
+          </div>
+          <div className="bg-green-50 border border-green-200 rounded-md px-3 py-2 text-green-800">
+            <strong>🔢 LaTeX Math:</strong> Use <code className="bg-green-100 px-1 rounded">$...$</code> for inline math and <code className="bg-green-100 px-1 rounded">$$...$$</code> for block math equations.
+          </div>
         </div>
       </div>
     </div>

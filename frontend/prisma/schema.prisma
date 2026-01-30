@@ -25,14 +25,48 @@ model Article {
   @@map("articles")
 }
 
-model Note {
+model Research {
   id          String   @id @default(cuid())
   title       String
-  content     String   // Enhanced markdown with LaTeX
-  tags        String?  // Comma-separated tags
-  isPublic    Boolean  @default(false) @map("is_public")
+  slug        String   @unique
+  content     String   // Markdown content
+  description String?
+  tags        String?  // Comma-separated tags: "research, ai, tech"
+  publishedAt DateTime? @map("published_at")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  @@map("notes")
+  @@map("research")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   // Markdown content (article attached to project)
+  description String?
+  imageUrl    String?  @map("image_url")
+  videoUrl    String?  @map("video_url")
+  tags        String?  // Comma-separated tags
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("projects")
+}
+
+model Website {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   // Markdown content (article attached to website)
+  description String?
+  imageUrl    String?  @map("image_url")
+  videoUrl    String?  @map("video_url")
+  tags        String?  // Comma-separated tags
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("websites")
 }

@@ -6,13 +6,14 @@ interface ArticleCardProps {
   slug: string
   tags?: string
   publishedAt?: Date
+  basePath?: string
 }
 
-export default function ArticleCard({ title, description, slug, tags, publishedAt }: ArticleCardProps) {
+export default function ArticleCard({ title, description, slug, tags, publishedAt, basePath = '/articles' }: ArticleCardProps) {
   const tagList = tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : []
 
   return (
-    <Link href={`/articles/${slug}`} className="block group">
+    <Link href={`${basePath}/${slug}`} className="block group">
       <article className="border-b border-gray-200 py-8 hover:border-gray-400 transition-all bg-white">
         <h3 className="text-xl font-medium mb-3 text-gray-900 group-hover:text-gray-600 transition-colors tracking-tight">
           {title}

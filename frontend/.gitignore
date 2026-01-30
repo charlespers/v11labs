@@ -43,3 +43,6 @@ prisma/dev.db
 
 # docs
 SETUP.md
+SETUP_VERCEL.md
+*.md
+!README.md

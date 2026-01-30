@@ -18,9 +18,10 @@ interface ArticlesListProps {
   articles: Article[]
   allTags: string[]
   selectedTag: string | null
+  basePath?: string
 }
 
-export default function ArticlesList({ articles, allTags, selectedTag }: ArticlesListProps) {
+export default function ArticlesList({ articles, allTags, selectedTag, basePath = '/articles' }: ArticlesListProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -31,7 +32,7 @@ export default function ArticlesList({ articles, allTags, selectedTag }: Article
     } else {
       params.delete('tag')
     }
-    router.push(`/articles?${params.toString()}`)
+    router.push(`${basePath}?${params.toString()}`)
   }
 
   return (
@@ -54,6 +55,7 @@ export default function ArticlesList({ articles, allTags, selectedTag }: Article
               slug={article.slug}
               tags={article.tags || undefined}
               publishedAt={article.publishedAt || undefined}
+              basePath={basePath}
             />
           ))}
         </div>

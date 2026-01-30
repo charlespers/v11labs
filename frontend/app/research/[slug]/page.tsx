@@ -3,28 +3,28 @@ import { notFound } from 'next/navigation'
 import EnhancedMarkdown from '@/components/EnhancedMarkdown'
 import Link from 'next/link'
 
-interface ArticlePageProps {
+interface ResearchPageProps {
   params: Promise<{ slug: string }>
 }
 
-export default async function ArticlePage({ params }: ArticlePageProps) {
+export default async function ResearchPage({ params }: ResearchPageProps) {
   const { slug } = await params
 
-  const article = await prisma.article.findUnique({
+  const research = await prisma.research.findUnique({
     where: { slug }
   })
 
-  if (!article || !article.publishedAt || article.publishedAt > new Date()) {
+  if (!research || !research.publishedAt || research.publishedAt > new Date()) {
     notFound()
   }
 
-  const tagList = article.tags ? article.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+  const tagList = research.tags ? research.tags.split(',').map(t => t.trim()).filter(Boolean) : []
 
-  // Get related articles (same tags)
-  const relatedArticles = tagList.length > 0
-    ? await prisma.article.findMany({
+  // Get related research (same tags)
+  const relatedResearch = tagList.length > 0
+    ? await prisma.research.findMany({
       where: {
-        id: { not: article.id },
+        id: { not: research.id },
         publishedAt: { not: null, lte: new Date() },
         tags: {
           contains: tagList[0]
@@ -41,14 +41,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <article>
         <header className="mb-12 border-b border-gray-200 pb-8">
-          <h1 className="text-3xl md:text-4xl font-medium text-gray-900 mb-4 tracking-tight leading-tight">{article.title}</h1>
-          {article.description && (
-            <p className="text-lg text-gray-600 mb-6 font-light leading-relaxed">{article.description}</p>
+          <h1 className="text-3xl md:text-4xl font-medium text-gray-900 mb-4 tracking-tight leading-tight">{research.title}</h1>
+          {research.description && (
+            <p className="text-lg text-gray-600 mb-6 font-light leading-relaxed">{research.description}</p>
           )}
           <div className="flex items-center gap-6 text-xs text-gray-500 uppercase tracking-wide">
-            {article.publishedAt && (
-              <time dateTime={article.publishedAt.toISOString()} className="font-light">
-                {article.publishedAt.toLocaleDateString('en-US', {
+            {research.publishedAt && (
+              <time dateTime={research.publishedAt.toISOString()} className="font-light">
+                {research.publishedAt.toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'
@@ -60,7 +60,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 {tagList.map((tag) => (
                   <Link
                     key={tag}
-                    href={`/articles?tag=${encodeURIComponent(tag)}`}
+                    href={`/research?tag=${encodeURIComponent(tag)}`}
                     className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-sm hover:bg-gray-200 transition-colors font-light uppercase tracking-wide"
                   >
                     {tag}
@@ -72,17 +72,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </header>
 
         <div className="prose prose-lg max-w-none mb-12">
-          <EnhancedMarkdown content={article.content} />
+          <EnhancedMarkdown content={research.content} />
         </div>
 
-        {relatedArticles.length > 0 && (
+        {relatedResearch.length > 0 && (
           <aside className="border-t border-gray-200 pt-12 mt-16">
-            <h2 className="text-sm font-medium text-gray-900 mb-6 uppercase tracking-wide">Related Articles</h2>
+            <h2 className="text-sm font-medium text-gray-900 mb-6 uppercase tracking-wide">Related Research</h2>
             <ul className="space-y-4">
-              {relatedArticles.map((related) => (
+              {relatedResearch.map((related) => (
                 <li key={related.id}>
                   <Link
-                    href={`/articles/${related.slug}`}
+                    href={`/research/${related.slug}`}
                     className="text-gray-900 hover:text-gray-600 transition-colors font-light"
                   >
                     {related.title}
