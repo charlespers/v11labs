@@ -22,25 +22,29 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     const bufferTime = 5 * 60 * 1000 // 5 minutes in milliseconds
     const cutoffDate = new Date(now.getTime() + bufferTime)
 
-    // Get all projects that is published (publishedAt is not null and <= now + buffer)
+    // Build where clause for Prisma query
+    const whereClause: any = {
+      publishedAt: {
+        not: null,
+        lte: cutoffDate
+      }
+    }
+
+    // Apply tag filter if specified
+    if (tag) {
+      whereClause.tags = {
+        contains: tag,
+        mode: 'insensitive'
+      }
+    }
+
+    // Get all projects that are published (publishedAt is not null and <= now + buffer)
     projects = await prisma.project.findMany({
-      where: {
-        publishedAt: {
-          not: null,
-          lte: cutoffDate
-        }
-      },
+      where: whereClause,
       orderBy: {
         publishedAt: 'desc'
       }
     })
-
-    // Apply tag filter if specified
-    if (tag) {
-      projects = projects.filter(item =>
-        item.tags?.toLowerCase().includes(tag.toLowerCase())
-      )
-    }
 
 
     // Extract all unique tags

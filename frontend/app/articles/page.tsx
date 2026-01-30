@@ -22,37 +22,27 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
     const bufferTime = 5 * 60 * 1000 // 5 minutes in milliseconds
     const cutoffDate = new Date(now.getTime() + bufferTime)
 
-    // First, get all articles with publishedAt set to debug
-    const allPublishedArticles = await prisma.article.findMany({
-      where: {
-        publishedAt: {
-          not: null
-        }
-      },
-      orderBy: {
-        publishedAt: 'desc'
+    // Get all articles that are published (publishedAt is not null and <= now + buffer)
+    const whereClause: any = {
+      publishedAt: {
+        not: null,
+        lte: cutoffDate
       }
-    })
-
-    // Filter in JavaScript to be more lenient with date comparison
-    articles = allPublishedArticles.filter(article => {
-      if (!article.publishedAt) return false
-      const publishedDate = new Date(article.publishedAt)
-      // Include articles published up to 5 minutes in the future (to handle timezone issues)
-      return publishedDate <= cutoffDate
-    })
+    }
 
     // Apply tag filter if specified
     if (tag) {
-      articles = articles.filter(article =>
-        article.tags?.toLowerCase().includes(tag.toLowerCase())
-      )
+      whereClause.tags = {
+        contains: tag,
+        mode: 'insensitive'
+      }
     }
 
-    // Sort by publishedAt descending
-    articles.sort((a, b) => {
-      if (!a.publishedAt || !b.publishedAt) return 0
-      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    articles = await prisma.article.findMany({
+      where: whereClause,
+      orderBy: {
+        publishedAt: 'desc'
+      }
     })
 
     // Extract all unique tags

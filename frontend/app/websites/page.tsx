@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
-import { Website } from '@prisma/client'
+import type { Website } from '@prisma/client'
 
 // Force dynamic rendering to avoid caching issues
 export const dynamic = 'force-dynamic'
@@ -22,32 +22,36 @@ export default async function WebsitesPage({ searchParams }: WebsitesPageProps) 
     const bufferTime = 5 * 60 * 1000 // 5 minutes in milliseconds
     const cutoffDate = new Date(now.getTime() + bufferTime)
 
-    // Get all websites that is published (publishedAt is not null and <= now + buffer)
+    // Build where clause for Prisma query
+    const whereClause: any = {
+      publishedAt: {
+        not: null,
+        lte: cutoffDate
+      }
+    }
+
+    // Apply tag filter if specified
+    if (tag) {
+      whereClause.tags = {
+        contains: tag,
+        mode: 'insensitive'
+      }
+    }
+
+    // Get all websites that are published (publishedAt is not null and <= now + buffer)
     websites = await prisma.website.findMany({
-      where: {
-        publishedAt: {
-          not: null,
-          lte: cutoffDate
-        }
-      },
+      where: whereClause,
       orderBy: {
         publishedAt: 'desc'
       }
     })
-
-    // Apply tag filter if specified
-    if (tag) {
-      websites = websites.filter(item =>
-        item.tags?.toLowerCase().includes(tag.toLowerCase())
-      )
-    }
 
 
     // Extract all unique tags
     allTags = Array.from(
       new Set(
         websites
-          .flatMap(item => item.tags?.split(',').map(t => t.trim()) || [])
+          .flatMap(item => item.tags?.split(',').map((t: string) => t.trim()) || [])
           .filter(Boolean)
       )
     ).sort()
@@ -134,7 +138,7 @@ export default async function WebsitesPage({ searchParams }: WebsitesPageProps) 
                   )}
                   {website.tags && (
                     <div className="flex gap-2 flex-wrap">
-                      {website.tags.split(',').slice(0, 3).map((tag) => (
+                      {website.tags.split(',').slice(0, 3).map((tag: string) => (
                         <span
                           key={tag.trim()}
                           className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-sm text-xs font-light uppercase tracking-wide"

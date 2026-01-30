@@ -22,25 +22,29 @@ export default async function ResearchPage({ searchParams }: ResearchPageProps) 
     const bufferTime = 5 * 60 * 1000 // 5 minutes in milliseconds
     const cutoffDate = new Date(now.getTime() + bufferTime)
 
-    // Get all research that is published (publishedAt is not null and <= now + buffer)
+    // Build where clause for Prisma query
+    const whereClause: any = {
+      publishedAt: {
+        not: null,
+        lte: cutoffDate
+      }
+    }
+
+    // Apply tag filter if specified
+    if (tag) {
+      whereClause.tags = {
+        contains: tag,
+        mode: 'insensitive'
+      }
+    }
+
+    // Get all research that are published (publishedAt is not null and <= now + buffer)
     research = await prisma.research.findMany({
-      where: {
-        publishedAt: {
-          not: null,
-          lte: cutoffDate
-        }
-      },
+      where: whereClause,
       orderBy: {
         publishedAt: 'desc'
       }
     })
-
-    // Apply tag filter if specified
-    if (tag) {
-      research = research.filter(item =>
-        item.tags?.toLowerCase().includes(tag.toLowerCase())
-      )
-    }
 
 
     // Extract all unique tags
