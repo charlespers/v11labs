@@ -22,24 +22,17 @@ export default async function ResearchPage({ searchParams }: ResearchPageProps) 
     const bufferTime = 5 * 60 * 1000 // 5 minutes in milliseconds
     const cutoffDate = new Date(now.getTime() + bufferTime)
 
-    // First, get all research with publishedAt set
-    const allPublishedResearch = await prisma.research.findMany({
+    // Get all research that is published (publishedAt is not null and <= now + buffer)
+    research = await prisma.research.findMany({
       where: {
         publishedAt: {
-          not: null
+          not: null,
+          lte: cutoffDate
         }
       },
       orderBy: {
         publishedAt: 'desc'
       }
-    })
-
-    // Filter in JavaScript to be more lenient with date comparison
-    research = allPublishedResearch.filter(item => {
-      if (!item.publishedAt) return false
-      const publishedDate = new Date(item.publishedAt)
-      // Include research published up to 5 minutes in the future (to handle timezone issues)
-      return publishedDate <= cutoffDate
     })
 
     // Apply tag filter if specified
@@ -49,11 +42,6 @@ export default async function ResearchPage({ searchParams }: ResearchPageProps) 
       )
     }
 
-    // Sort by publishedAt descending
-    research.sort((a, b) => {
-      if (!a.publishedAt || !b.publishedAt) return 0
-      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    })
 
     // Extract all unique tags
     allTags = Array.from(

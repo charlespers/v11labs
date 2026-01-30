@@ -22,24 +22,17 @@ export default async function WebsitesPage({ searchParams }: WebsitesPageProps) 
     const bufferTime = 5 * 60 * 1000 // 5 minutes in milliseconds
     const cutoffDate = new Date(now.getTime() + bufferTime)
 
-    // First, get all websites with publishedAt set
-    const allPublishedWebsites = await prisma.website.findMany({
+    // Get all websites that is published (publishedAt is not null and <= now + buffer)
+    websites = await prisma.website.findMany({
       where: {
         publishedAt: {
-          not: null
+          not: null,
+          lte: cutoffDate
         }
       },
       orderBy: {
         publishedAt: 'desc'
       }
-    })
-
-    // Filter in JavaScript to be more lenient with date comparison
-    websites = allPublishedWebsites.filter(item => {
-      if (!item.publishedAt) return false
-      const publishedDate = new Date(item.publishedAt)
-      // Include websites published up to 5 minutes in the future (to handle timezone issues)
-      return publishedDate <= cutoffDate
     })
 
     // Apply tag filter if specified
@@ -49,11 +42,6 @@ export default async function WebsitesPage({ searchParams }: WebsitesPageProps) 
       )
     }
 
-    // Sort by publishedAt descending
-    websites.sort((a, b) => {
-      if (!a.publishedAt || !b.publishedAt) return 0
-      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    })
 
     // Extract all unique tags
     allTags = Array.from(

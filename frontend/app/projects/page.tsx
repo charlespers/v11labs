@@ -22,24 +22,17 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     const bufferTime = 5 * 60 * 1000 // 5 minutes in milliseconds
     const cutoffDate = new Date(now.getTime() + bufferTime)
 
-    // First, get all projects with publishedAt set
-    const allPublishedProjects = await prisma.project.findMany({
+    // Get all projects that is published (publishedAt is not null and <= now + buffer)
+    projects = await prisma.project.findMany({
       where: {
         publishedAt: {
-          not: null
+          not: null,
+          lte: cutoffDate
         }
       },
       orderBy: {
         publishedAt: 'desc'
       }
-    })
-
-    // Filter in JavaScript to be more lenient with date comparison
-    projects = allPublishedProjects.filter(item => {
-      if (!item.publishedAt) return false
-      const publishedDate = new Date(item.publishedAt)
-      // Include projects published up to 5 minutes in the future (to handle timezone issues)
-      return publishedDate <= cutoffDate
     })
 
     // Apply tag filter if specified
@@ -49,11 +42,6 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       )
     }
 
-    // Sort by publishedAt descending
-    projects.sort((a, b) => {
-      if (!a.publishedAt || !b.publishedAt) return 0
-      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    })
 
     // Extract all unique tags
     allTags = Array.from(
